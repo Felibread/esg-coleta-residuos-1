@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.api.Assertions;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.util.HashMap;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor
 public class PontoColetaSteps {
@@ -33,7 +33,8 @@ public class PontoColetaSteps {
     @Dado("que a aplicação está em execução")
     public void queAAplicacaoEstaEmExecucao() {
         Response health = given().get("/api/pontos-coleta").then().extract().response();
-        assertThat((Integer) health.statusCode()).isIn(200, 404);
+        Integer status = health.statusCode();
+        Assertions.assertThat(status).isIn(200, 404);
     }
 
     @Dado("que tenho os dados de um novo ponto de coleta:")
@@ -78,12 +79,14 @@ public class PontoColetaSteps {
         body.put("tipoResiduo", "METAL");
         body.put("endereco", "Av. Sustentável, 500");
         body.put("capacidadeKg", 200.0);
-        given().contentType(ContentType.JSON).body(body).post("/api/pontos-coleta").then().statusCode(201);
+        given().contentType(ContentType.JSON).body(body)
+                .post("/api/pontos-coleta").then().statusCode(201);
     }
 
     @Quando("envio uma requisição POST para {string}")
     public void envioUmaRequisicaoPOST(String endpoint) {
-        ctx.setResponse(given().contentType(ContentType.JSON).body(ctx.getRequestBody())
+        ctx.setResponse(given().contentType(ContentType.JSON)
+                .body(ctx.getRequestBody())
                 .post(endpoint).then().extract().response());
     }
 
@@ -96,38 +99,49 @@ public class PontoColetaSteps {
 
     @Então("o status da resposta deve ser {int}")
     public void oStatusDaRespostaDeveSer(int expected) {
-        assertThat((Integer) ctx.getResponse().statusCode())
-                .as("Status HTTP esperado: %d, obtido: %d", expected, ctx.getResponse().statusCode())
+        Integer statusAtual = ctx.getResponse().statusCode();
+        Assertions.assertThat(statusAtual)
+                .as("Status HTTP esperado: %d, obtido: %d", expected, statusAtual)
                 .isEqualTo(expected);
     }
 
     @Então("o corpo da resposta deve conter o campo {string} não nulo")
     public void oCorpoDaRespostaDeveConterCampoNaoNulo(String campo) {
-        assertThat(ctx.getResponse().jsonPath().get(campo))
-                .as("Campo '%s' não pode ser nulo", campo).isNotNull();
+        Object valor = ctx.getResponse().jsonPath().get(campo);
+        Assertions.assertThat(valor)
+                .as("Campo '%s' não pode ser nulo", campo)
+                .isNotNull();
     }
 
     @Então("o corpo da resposta deve conter {string} com valor {string}")
     public void oCorpoDaRespostaDeveConterComValor(String campo, String valorEsperado) {
         String valor = ctx.getResponse().jsonPath().getString(campo);
-        assertThat(valor).as("Campo '%s'", campo).isEqualTo(valorEsperado);
+        Assertions.assertThat(valor)
+                .as("Campo '%s'", campo)
+                .isEqualTo(valorEsperado);
     }
 
     @Então("o corpo da resposta deve conter o campo {string} com valor {string}")
     public void oCorpoDaRespostaDeveConterOCampoComValor(String campo, String valorEsperado) {
         String valor = ctx.getResponse().jsonPath().getString(campo);
-        assertThat(valor).as("Campo '%s'", campo).isEqualTo(valorEsperado);
+        Assertions.assertThat(valor)
+                .as("Campo '%s'", campo)
+                .isEqualTo(valorEsperado);
     }
 
     @Então("o corpo da resposta deve conter o campo {string} com erros de validação")
     public void oCorpoDaRespostaDeveConterErrosDeValidacao(String campo) {
         List<?> mensagens = ctx.getResponse().jsonPath().getList(campo);
-        assertThat(mensagens).as("Erros de validação em '%s'", campo).isNotNull().isNotEmpty();
+        Assertions.assertThat(mensagens)
+                .as("Erros de validação em '%s'", campo)
+                .isNotNull()
+                .isNotEmpty();
     }
 
     @Então("o corpo da resposta deve ser uma lista")
     public void oCorpoDaRespostaDeveSerUmaLista() {
-        assertThat(ctx.getResponse().jsonPath().getList("$")).isNotNull();
+        List<?> lista = ctx.getResponse().jsonPath().getList("$");
+        Assertions.assertThat(lista).isNotNull();
     }
 
     @Então("todos os itens da lista devem ter {string} igual a {string}")
@@ -136,12 +150,14 @@ public class PontoColetaSteps {
             boolean boolEsperado = Boolean.parseBoolean(valorEsperado);
             List<Boolean> valores = ctx.getResponse().jsonPath().getList(campo, Boolean.class);
             if (valores != null && !valores.isEmpty()) {
-                assertThat(valores).allSatisfy(v -> assertThat(v).isEqualTo(boolEsperado));
+                Assertions.assertThat(valores)
+                        .allSatisfy(v -> Assertions.assertThat(v).isEqualTo(boolEsperado));
             }
         } else {
             List<String> valores = ctx.getResponse().jsonPath().getList(campo, String.class);
             if (valores != null && !valores.isEmpty()) {
-                assertThat(valores).allSatisfy(v -> assertThat(v).isEqualTo(valorEsperado));
+                Assertions.assertThat(valores)
+                        .allSatisfy(v -> Assertions.assertThat(v).isEqualTo(valorEsperado));
             }
         }
     }
