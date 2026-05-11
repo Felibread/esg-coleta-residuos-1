@@ -33,7 +33,7 @@ public class PontoColetaSteps {
     @Dado("que a aplicação está em execução")
     public void queAAplicacaoEstaEmExecucao() {
         Response health = given().get("/api/pontos-coleta").then().extract().response();
-        assertThat(health.statusCode()).isIn(200, 404);
+        assertThat((Integer) health.statusCode()).isIn(200, 404);
     }
 
     @Dado("que tenho os dados de um novo ponto de coleta:")
@@ -96,7 +96,7 @@ public class PontoColetaSteps {
 
     @Então("o status da resposta deve ser {int}")
     public void oStatusDaRespostaDeveSer(int expected) {
-        assertThat(ctx.getResponse().statusCode())
+        assertThat((Integer) ctx.getResponse().statusCode())
                 .as("Status HTTP esperado: %d, obtido: %d", expected, ctx.getResponse().statusCode())
                 .isEqualTo(expected);
     }
