@@ -324,5 +324,10 @@ Este projeto demonstra como a automação de testes contribui diretamente para o
 - **Governança**: Testes de contrato (JSON Schema) garantem conformidade regulatória e estabilidade das integrações
 
 ---
+<img width="1815" height="877" alt="image" src="https://github.com/user-attachments/assets/066e0251-57a2-4f6a-b95b-0b839a72acc4" />
+<img width="1808" height="877" alt="image" src="https://github.com/user-attachments/assets/6301f9e7-dd2e-4bf0-8bca-0705cb9fd02a" />
+<img width="1803" height="857" alt="image" src="https://github.com/user-attachments/assets/b76b4afe-84c5-456a-a1a6-bcd6036c4d8c" />
+<img width="1833" height="785" alt="image" src="https://github.com/user-attachments/assets/5faa3cfa-50cd-45e4-86d0-db081127619c" />
+
 
 *Desenvolvido como projeto acadêmico — Fase de Testes Automatizados — ESG & Sustentabilidade*
