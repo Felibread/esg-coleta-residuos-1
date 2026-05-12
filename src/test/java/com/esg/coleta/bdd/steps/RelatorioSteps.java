@@ -1,12 +1,14 @@
 package com.esg.coleta.bdd.steps;
 
 import com.esg.coleta.bdd.SharedTestContext;
+import com.esg.coleta.repository.ColetaRepository;
 import io.cucumber.java.Before;
 import io.cucumber.java.pt.*;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.api.Assertions;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.util.HashMap;
@@ -14,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor
 public class RelatorioSteps {
@@ -23,6 +24,7 @@ public class RelatorioSteps {
     private int port;
 
     private final SharedTestContext ctx;
+    private final ColetaRepository coletaRepository;
 
     @Before
     public void setup() {
@@ -55,14 +57,15 @@ public class RelatorioSteps {
 
     @Dado("que não há coletas concluídas no sistema")
     public void queNaoHaColetasConcluidas() {
-        // Banco em memória limpo por cenário — nenhuma ação necessária
+        // Limpa todas as coletas do banco para garantir isolamento
+        coletaRepository.deleteAll();
     }
 
     @Então("o corpo da resposta deve conter os campos ESG obrigatórios:")
     public void oCorpoDaRespostaDeveConterOsCamposESGObrigatorios(List<String> campos) {
         for (String campo : campos) {
             Object valor = ctx.getResponse().jsonPath().get(campo.trim());
-            assertThat(valor)
+            Assertions.assertThat(valor)
                     .as("Campo ESG '%s' deve estar presente na resposta", campo.trim())
                     .isNotNull();
         }
@@ -71,25 +74,30 @@ public class RelatorioSteps {
     @Então("o campo {string} deve ser maior que zero")
     public void oCampoDeveSerMaiorQueZero(String campo) {
         Double valor = ctx.getResponse().jsonPath().getDouble(campo);
-        assertThat(valor).as("Campo '%s' deve ser > 0", campo).isGreaterThan(0.0);
+        Assertions.assertThat(valor)
+                .as("Campo '%s' deve ser > 0", campo)
+                .isGreaterThan(0.0);
     }
 
     @Então("o campo {string} deve ser igual a zero")
     public void oCampoDeveSerIgualAZero(String campo) {
         Double valor = ctx.getResponse().jsonPath().getDouble(campo);
-        assertThat(valor).as("Campo '%s' deve ser == 0", campo).isEqualTo(0.0);
+        Assertions.assertThat(valor)
+                .as("Campo '%s' deve ser == 0", campo)
+                .isEqualTo(0.0);
     }
 
     @Então("o campo {string} deve conter informações de sustentabilidade")
     public void oCampoDeveConterInformacoesDeSustentabilidade(String campo) {
         String valor = ctx.getResponse().jsonPath().getString(campo);
-        assertThat(valor).isNotBlank()
+        Assertions.assertThat(valor)
+                .isNotBlank()
                 .containsAnyOf("coleta", "resíduo", "reciclad", "CO2", "sustent", "ODS");
     }
 
     @Então("o campo {string} deve indicar ausência de coletas concluídas")
     public void oCampoDeveIndicarAusenciaDeColetas(String campo) {
         String valor = ctx.getResponse().jsonPath().getString(campo);
-        assertThat(valor).isNotBlank();
+        Assertions.assertThat(valor).isNotBlank();
     }
 }
